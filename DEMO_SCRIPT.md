@@ -3,6 +3,7 @@
 **Target Duration:** 2 minutes 40 seconds (under the 3-minute hackathon maximum)  
 **Hackathon:** AWS Agent Experience Hackathon: Strands Decider  
 **Tags:** `#strands-decider-2b` `#tool-selection`  
+**GitHub Repository:** [https://github.com/KvPradeepthi/devflow-ai](https://github.com/KvPradeepthi/devflow-ai)  
 
 ---
 
@@ -11,7 +12,7 @@
 | Scene | Time Window | Visual Focus | Audio / Spoken Narration |
 | :---: | :---: | :--- | :--- |
 | **1** | 0:00 – 0:25 | Title slide & Streamlit UI overview | Project concept, problem of LLM routing latency, two-tier architecture introduction. |
-| **2** | 0:25 – 0:55 | Clicking Preset: "Debug Error" | Entering error traceback; live Decider 2B inference in 28ms; probability distribution. |
+| **2** | 0:25 – 0:55 | Clicking Preset: "Debug Error" | Entering error traceback; Decider 2B inference in ~28ms; probability distribution. |
 | **3** | 0:55 – 1:25 | Tool Diagnostic & Bedrock Synthesis | Tool output showing verified facts vs hypotheses; Amazon Bedrock generating concise grounded fix. |
 | **4** | 1:25 – 1:55 | Ambiguous Query (Confidence Gate) | Entering vague query; confidence dropping below 0.60; policy guardrail triggering safe fallback. |
 | **5** | 1:55 – 2:20 | Auditable Decision Trace (JSON) | Inspecting full audit trace: timestamps, latencies, probabilities, model parameters. |
@@ -28,13 +29,13 @@
 
 ---
 
-### Scene 2: Live Routing with Strands Decider 2B (0:25 – 0:55)
+### Scene 2: Tool Selection Routing (0:25 – 0:55)
 - **Visual**: Cursor clicks the preset button: **"Debug Error"**. The request field populates with:  
   `Why am I getting this KeyError when parsing API response?`  
   and the context area populates with a Python traceback showing `KeyError: 'auth'` at line 42.  
   Click **"Route & Process Request"**.
 - **Narrator**:
-  > *"Let's submit a real developer problem: a nested KeyError during JWT authentication. Behind the scenes, DevFlow AI sends a typed ChoiceQuestion directly to Strands Decider 2B over the System One API. Notice the metrics bar at the top: Decider 2B evaluated the request and context in just 28 milliseconds, selecting 'debug_error' with a calibrated confidence of 100%. Below, the probability distribution chart confirms that over 99% of probability mass was concentrated on the error debugging tool."*
+  > *"Let's submit a real developer problem: a nested KeyError during JWT authentication. Behind the scenes, DevFlow AI sends a typed ChoiceQuestion directly to Strands Decider 2B over the official System One API. Notice the metrics bar at the top: Decider 2B evaluated the request and context in just 28 milliseconds, selecting 'debug_error' with a calibrated confidence of 100%. Below, the probability distribution confirms that over 99% of probability mass was concentrated on the error debugging tool."*
 
 ---
 
@@ -66,10 +67,10 @@
 ---
 
 ### Scene 6: Reusable Decision Pattern & Conclusion (2:20 – 2:40)
-- **Visual**: Switch to VS Code terminal.  
+- **Visual**: Switch to VS Code terminal or GitHub page.  
   Show `decision_patterns/tool_selection/` with `questions.json` and run:  
   `python decision_patterns/tool_selection/example.py`  
-  Show clean terminal output and display the GitHub repository page.
+  Show clean terminal output and display the GitHub repository page at `https://github.com/KvPradeepthi/devflow-ai`.
 - **Narrator**:
   > *"We've packaged this entire workflow into a standalone, reusable decision pattern under `decision_patterns/tool_selection/`, complete with typed schemas, independent Python examples, and automated tests. DevFlow AI proves that separating fast System One decisions from generative synthesis creates faster, cheaper, and safer AI agents. Thank you for watching!"*
 

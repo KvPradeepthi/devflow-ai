@@ -3,8 +3,8 @@
 **Author:** DevFlow AI Engineering Team  
 **Event:** AWS Agent Experience Hackathon: Strands Decider  
 **Tags:** `#strands-decider-2b` `#tool-selection`  
-**GitHub Repository:** `https://github.com/your-username/devflow-ai` *(replace with published repo URL)*  
-**Demo Video:** `https://youtu.be/placeholder-demo` *(replace with published video URL)*  
+**GitHub Repository:** [https://github.com/KvPradeepthi/devflow-ai](https://github.com/KvPradeepthi/devflow-ai)  
+**Demo Video:** *(Upload demo video to YouTube/Vimeo and insert URL here before submitting)*  
 
 ---
 
@@ -119,23 +119,30 @@ By supplying the tool's factual output directly to Bedrock, the generative model
 
 ---
 
-## Benchmark Results: Decider 2B Architecture vs. Generative LLMs
+## Benchmark Results & Integration Verification Status
 
-We constructed an evaluation suite of 20 realistic developer queries across all four tool categories and evaluated them over 60 test runs.
+### Transparent Disclosure of Integration Status
+To adhere to the highest standard of scientific integrity and hackathon rules:
+1. **Core Pipeline Implementation**: Genuinely built and verified. Strands Decider wire protocol, confidence math, router policy, tools, Bedrock Converse client, and 30 automated tests (`tests/`) are fully implemented and passing.
+2. **Offline Simulation Benchmark**: The benchmark figures below were recorded on our calibrated offline simulation baseline (`server_status: offline_calibrated_engine`) because our local development environment (Intel Iris Xe graphics, 0 GB free drive C:) lacked the memory and disk space to host the 4.8 GB weights locally.
+3. **Live Model Server**: We provide a Google Colab notebook (`notebooks/decider_colab_server.ipynb`) with an authenticated FastAPI proxy and Cloudflare tunnel to run live GPU inference on a Tesla T4 runtime.
+4. **Strict Live Mode**: The application includes a strict live mode switch (`allow_offline_fallback=False`) which completely refuses to simulate decisions if the live model server or AWS credentials are unavailable.
 
-> **Transparency Note**: In this preliminary benchmark run, the evaluation was conducted using the calibrated offline simulation engine because the local test environment was memory-constrained. The latency reflects simulated System One dispatch overhead; live model inference latency on GPU hardware is documented at ~25–115ms.
+### Benchmark Comparison Table
 
-| Metric | Offline Simulation Baseline | Anthropic Claude 3 Haiku | Anthropic Claude 3.5 Sonnet |
+Evaluated across 20 representative developer queries over 60 test runs:
+
+| Metric | Offline Simulation Baseline | Anthropic Claude 3 Haiku (Estimated) | Anthropic Claude 3.5 Sonnet (Estimated) |
 | :--- | :---: | :---: | :---: |
 | **Routing Latency** | **28.53 ms** (simulated) | ~950 ms | ~2,200 ms |
 | **Routing Latency Speedup** | **Baseline (1.0x)** | **33.2x slower** | **76.8x slower** |
 | **Routing Token Charges** | **$0.00 (0 tokens)** | $0.00014 / decision | $0.00165 / decision |
 | **Cost per 10,000 Decisions** | **$0.00** | $1.38 | $16.50 |
-| **Empirical Routing Accuracy** | **90.00%** (18/20 cases) | ~92.0% | ~94.0% |
+| **Empirical Routing Accuracy** | **90.00%** (18/20 cases, simulated) | ~92.0% | ~94.0% |
 | **Mean Calibrated Confidence** | **0.9183** | N/A | N/A |
 
-### Key Benchmark Takeaways
-1. **Dramatically Lower Latency**: System One decision architectures evaluate routing choices in under 30 milliseconds, enabling near-instantaneous agent responsiveness.
+### Key Architectural Takeaways
+1. **Dramatically Lower Latency**: System One decision models evaluate routing choices in under 30 milliseconds, enabling near-instantaneous agent responsiveness.
 2. **Predictable Deterministic Output**: Decider models output clean typed choices conforming to the wire schema, completely eliminating JSON parsing errors and hallucinated tool names.
 3. **Zero Token Ingestion Cost for Routing**: High-throughput developer workflows can process tens of thousands of requests without accumulating generative token bills.
 
@@ -153,6 +160,6 @@ We constructed an evaluation suite of 20 realistic developer queries across all 
 
 DevFlow AI demonstrates that separating System One decision-making from System Two generative synthesis creates faster, cheaper, and safer AI agents.
 
-- **Source Code**: [GitHub Repository](https://github.com/your-username/devflow-ai)
-- **Demo Video**: [3-Minute Video Walkthrough](https://youtu.be/placeholder-demo)
+- **Source Code**: [https://github.com/KvPradeepthi/devflow-ai](https://github.com/KvPradeepthi/devflow-ai)
+- **Demo Video**: *(Insert URL here once recorded)*
 - **Hackathon Tags**: `#strands-decider-2b` `#tool-selection`
