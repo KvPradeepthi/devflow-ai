@@ -4,8 +4,9 @@ Produces a production-hardened Google Colab notebook to run Strands Decider 2B:
 - Dynamic device detection: CUDA GPU when assigned, automatic fallback to CPU mode.
 - Avoids duplicate processes on ports 8099 and 8000.
 - Health checks Strands Decider BEFORE opening the tunnel.
+- Dynamic token loading from .decider_token without hardcoding into source.
 - Verifies Bearer token auth policy locally before exposing to tunnel.
-- Fixes pycloudflared Urls object attribute handling (.tunnel / regex).
+- Robust pycloudflared Urls object attribute handling (.tunnel / regex).
 - Never prints secrets or tokens directly into notebook cell outputs.
 """
 
@@ -89,7 +90,7 @@ notebook = {
             "metadata": {},
             "source": [
                 "### Step 3: Configure Authentication Token\n",
-                "Sets an authentication token in memory to protect your remote model endpoint. The token is never printed to output cells to prevent credential leakage in notebooks, demos, or version control."
+                "Sets an authentication token in memory to protect your remote model endpoint. The token is stored in memory and `.decider_token`, but never printed into output cells to prevent credential leakage in notebooks, demos, or version control."
             ]
         },
         {
@@ -119,7 +120,7 @@ notebook = {
             "metadata": {},
             "source": [
                 "### Step 4: Write Secure Reverse Proxy Script\n",
-                "This FastAPI proxy listens on port 8000 and requires `Authorization: Bearer <API_KEY>` for all incoming requests. Unauthorized requests receive `401 Unauthorized`."
+                "This FastAPI proxy listens on port 8000 and requires `Authorization: Bearer <API_KEY>` for all incoming requests. It dynamically loads the secret from `.decider_token`. Unauthorized requests receive `401 Unauthorized`."
             ]
         },
         {
@@ -128,20 +129,28 @@ notebook = {
             "metadata": {},
             "outputs": [],
             "source": [
-                "proxy_code = f'''\n",
+                "proxy_code = '''\n",
                 "from fastapi import FastAPI, Header, HTTPException, Request, Response\n",
                 "import httpx\n",
+                "import os\n",
                 "import uvicorn\n",
                 "\n",
                 "app = FastAPI(title=\"Strands Decider Auth Proxy\")\n",
-                "SECRET_KEY = \"{API_KEY}\"\n",
                 "DECIDER_INTERNAL_URL = \"http://127.0.0.1:8099\"\n",
                 "\n",
+                "def get_secret_key() -> str:\n",
+                "    try:\n",
+                "        with open(\".decider_token\", \"r\") as f:\n",
+                "            return f.read().strip()\n",
+                "    except Exception:\n",
+                "        return os.environ.get(\"API_KEY\", \"\")\n",
+                "\n",
                 "def verify_token(authorization: str | None = Header(None)):\n",
+                "    secret_key = get_secret_key()\n",
                 "    if not authorization:\n",
                 "        raise HTTPException(status_code=401, detail=\"Missing Authorization header\")\n",
                 "    parts = authorization.split()\n",
-                "    if len(parts) != 2 or parts[0].lower() != \"bearer\" or parts[1] != SECRET_KEY:\n",
+                "    if len(parts) != 2 or parts[0].lower() != \"bearer\" or parts[1] != secret_key:\n",
                 "        raise HTTPException(status_code=401, detail=\"Invalid Bearer token\")\n",
                 "\n",
                 "@app.get(\"/health\")\n",
@@ -149,10 +158,10 @@ notebook = {
                 "    verify_token(authorization)\n",
                 "    async with httpx.AsyncClient() as client:\n",
                 "        try:\n",
-                "            res = await client.get(f\"{{DECIDER_INTERNAL_URL}}/health\", timeout=5.0)\n",
+                "            res = await client.get(f\"{DECIDER_INTERNAL_URL}/health\", timeout=5.0)\n",
                 "            return res.json()\n",
                 "        except Exception as e:\n",
-                "            return {{\"online\": False, \"error\": str(e)}}\n",
+                "            return {\"online\": False, \"error\": str(e)}\n",
                 "\n",
                 "@app.post(\"/v1/systemone\")\n",
                 "async def proxy_systemone(request: Request, authorization: str | None = Header(None)):\n",
@@ -161,21 +170,21 @@ notebook = {
                 "    async with httpx.AsyncClient() as client:\n",
                 "        try:\n",
                 "            res = await client.post(\n",
-                "                f\"{{DECIDER_INTERNAL_URL}}/v1/systemone\",\n",
+                "                f\"{DECIDER_INTERNAL_URL}/v1/systemone\",\n",
                 "                content=body,\n",
-                "                headers={{\"Content-Type\": \"application/json\"}},\n",
+                "                headers={\"Content-Type\": \"application/json\"},\n",
                 "                timeout=30.0,\n",
                 "            )\n",
                 "            return Response(content=res.content, status_code=res.status_code, media_type=\"application/json\")\n",
                 "        except Exception as e:\n",
-                "            raise HTTPException(status_code=502, detail=f\"Internal Decider error: {{e}}\")\n",
+                "            raise HTTPException(status_code=502, detail=f\"Internal Decider error: {e}\")\n",
                 "\n",
                 "if __name__ == \"__main__\":\n",
                 "    uvicorn.run(app, host=\"127.0.0.1\", port=8000)\n",
                 "'''\n",
                 "\n",
                 "with open(\"auth_proxy.py\", \"w\") as f:\n",
-                "    f.write(proxy_code)\n",
+                "    f.write(proxy_code.strip())\n",
                 "print(\"[+] Created auth_proxy.py successfully.\")"
             ]
         },
@@ -258,7 +267,7 @@ notebook = {
                 "if match:\n",
                 "    tunnel_url = match.group(0)\n",
                 "else:\n",
-                "    tunnel_url = str(raw_tunnel).strip()\n",
+                "    raise RuntimeError(f\"[-] Could not extract Cloudflare tunnel URL from: {raw_tunnel}\")\n",
                 "\n",
                 "print(\"\\n\" + \"=\" * 75)\n",
                 "print(\"STRANDS DECIDER 2B SERVER IS LIVE AND SECURED!\")\n",
