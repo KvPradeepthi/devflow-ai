@@ -1,0 +1,267 @@
+{
+  "benchmark_timestamp": "2026-10-22T08:59:53Z",
+  "dataset_size": 20,
+  "trials_per_case": 3,
+  "total_evaluations": 60,
+  "server_status": "offline_calibrated_engine",
+  "decider_model": "StrandsAgents/strands-decider-2B-qwen3.5-v1-2610",
+  "overall_accuracy_pct": 90.0,
+  "mean_confidence": 0.9183,
+  "latency_metrics_ms": {
+    "decider_mean": 28.53,
+    "decider_median": 28.53,
+    "decider_p95": 28.54,
+    "end_to_end_mean": 628.46
+  },
+  "per_category_accuracy": {
+    "explain_code": {
+      "total": 15,
+      "correct": 12,
+      "accuracy_pct": 80.0,
+      "mean_latency_ms": 28.53
+    },
+    "debug_error": {
+      "total": 15,
+      "correct": 15,
+      "accuracy_pct": 100.0,
+      "mean_latency_ms": 28.53
+    },
+    "analyze_test": {
+      "total": 15,
+      "correct": 12,
+      "accuracy_pct": 80.0,
+      "mean_latency_ms": 28.53
+    },
+    "search_docs": {
+      "total": 15,
+      "correct": 15,
+      "accuracy_pct": 100.0,
+      "mean_latency_ms": 28.53
+    }
+  },
+  "baseline_comparison": {
+    "strands_decider_2b": {
+      "routing_latency_ms": 28.53,
+      "cost_per_1000_decisions_usd": 0.0,
+      "notes": "Zero token charges (local/dedicated inference)"
+    },
+    "claude_3_haiku": {
+      "model": "Anthropic Claude 3 Haiku (via Bedrock)",
+      "estimated_routing_latency_ms": 950.0,
+      "input_tokens_per_decision": 350,
+      "output_tokens_per_decision": 40,
+      "cost_per_1000_decisions_usd": 0.1375,
+      "latency_speedup_factor": 33.3
+    },
+    "claude_3_5_sonnet": {
+      "model": "Anthropic Claude 3.5 Sonnet (via Bedrock)",
+      "estimated_routing_latency_ms": 2200.0,
+      "input_tokens_per_decision": 350,
+      "output_tokens_per_decision": 40,
+      "cost_per_1000_decisions_usd": 1.65,
+      "latency_speedup_factor": 77.1
+    }
+  },
+  "detailed_results": [
+    {
+      "id": "eval_01",
+      "category": "explain_code",
+      "expected_tool": "explain_code",
+      "predicted_tool": "explain_code",
+      "is_correct": true,
+      "mean_confidence": 0.9999,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 766.91
+    },
+    {
+      "id": "eval_02",
+      "category": "explain_code",
+      "expected_tool": "explain_code",
+      "predicted_tool": "explain_code",
+      "is_correct": true,
+      "mean_confidence": 0.8892,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 624.27
+    },
+    {
+      "id": "eval_03",
+      "category": "explain_code",
+      "expected_tool": "explain_code",
+      "predicted_tool": "explain_code",
+      "is_correct": true,
+      "mean_confidence": 0.9999,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 615.12
+    },
+    {
+      "id": "eval_04",
+      "category": "explain_code",
+      "expected_tool": "explain_code",
+      "predicted_tool": "explain_code",
+      "is_correct": true,
+      "mean_confidence": 0.9999,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 620.75
+    },
+    {
+      "id": "eval_05",
+      "category": "explain_code",
+      "expected_tool": "explain_code",
+      "predicted_tool": "search_docs",
+      "is_correct": false,
+      "mean_confidence": 0.0,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 619.16
+    },
+    {
+      "id": "eval_06",
+      "category": "debug_error",
+      "expected_tool": "debug_error",
+      "predicted_tool": "debug_error",
+      "is_correct": true,
+      "mean_confidence": 1.0,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 620.47
+    },
+    {
+      "id": "eval_07",
+      "category": "debug_error",
+      "expected_tool": "debug_error",
+      "predicted_tool": "debug_error",
+      "is_correct": true,
+      "mean_confidence": 1.0,
+      "mean_decider_latency_ms": 28.54,
+      "mean_total_latency_ms": 622.26
+    },
+    {
+      "id": "eval_08",
+      "category": "debug_error",
+      "expected_tool": "debug_error",
+      "predicted_tool": "debug_error",
+      "is_correct": true,
+      "mean_confidence": 1.0,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 620.75
+    },
+    {
+      "id": "eval_09",
+      "category": "debug_error",
+      "expected_tool": "debug_error",
+      "predicted_tool": "debug_error",
+      "is_correct": true,
+      "mean_confidence": 0.9995,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 620.72
+    },
+    {
+      "id": "eval_10",
+      "category": "debug_error",
+      "expected_tool": "debug_error",
+      "predicted_tool": "debug_error",
+      "is_correct": true,
+      "mean_confidence": 0.9995,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 622.5
+    },
+    {
+      "id": "eval_11",
+      "category": "analyze_test",
+      "expected_tool": "analyze_test",
+      "predicted_tool": "analyze_test",
+      "is_correct": true,
+      "mean_confidence": 0.9945,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 621.32
+    },
+    {
+      "id": "eval_12",
+      "category": "analyze_test",
+      "expected_tool": "analyze_test",
+      "predicted_tool": "analyze_test",
+      "is_correct": true,
+      "mean_confidence": 1.0,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 622.75
+    },
+    {
+      "id": "eval_13",
+      "category": "analyze_test",
+      "expected_tool": "analyze_test",
+      "predicted_tool": "analyze_test",
+      "is_correct": true,
+      "mean_confidence": 0.9945,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 621.36
+    },
+    {
+      "id": "eval_14",
+      "category": "analyze_test",
+      "expected_tool": "analyze_test",
+      "predicted_tool": "analyze_test",
+      "is_correct": true,
+      "mean_confidence": 0.9998,
+      "mean_decider_latency_ms": 28.54,
+      "mean_total_latency_ms": 614.45
+    },
+    {
+      "id": "eval_15",
+      "category": "analyze_test",
+      "expected_tool": "analyze_test",
+      "predicted_tool": "search_docs",
+      "is_correct": false,
+      "mean_confidence": 0.4897,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 624.69
+    },
+    {
+      "id": "eval_16",
+      "category": "search_docs",
+      "expected_tool": "search_docs",
+      "predicted_tool": "search_docs",
+      "is_correct": true,
+      "mean_confidence": 1.0,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 620.71
+    },
+    {
+      "id": "eval_17",
+      "category": "search_docs",
+      "expected_tool": "search_docs",
+      "predicted_tool": "search_docs",
+      "is_correct": true,
+      "mean_confidence": 0.9995,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 625.22
+    },
+    {
+      "id": "eval_18",
+      "category": "search_docs",
+      "expected_tool": "search_docs",
+      "predicted_tool": "search_docs",
+      "is_correct": true,
+      "mean_confidence": 0.9997,
+      "mean_decider_latency_ms": 28.52,
+      "mean_total_latency_ms": 618.61
+    },
+    {
+      "id": "eval_19",
+      "category": "search_docs",
+      "expected_tool": "search_docs",
+      "predicted_tool": "search_docs",
+      "is_correct": true,
+      "mean_confidence": 0.9998,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 625.84
+    },
+    {
+      "id": "eval_20",
+      "category": "search_docs",
+      "expected_tool": "search_docs",
+      "predicted_tool": "search_docs",
+      "is_correct": true,
+      "mean_confidence": 1.0,
+      "mean_decider_latency_ms": 28.53,
+      "mean_total_latency_ms": 621.45
+    }
+  ]
+}

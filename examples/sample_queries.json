@@ -1,0 +1,32 @@
+{
+  "examples": [
+    {
+      "id": "code_01",
+      "tool": "explain_code",
+      "title": "Asynchronous Task Pipeline Explanation",
+      "request": "Explain how this asynchronous event pipeline coordinates worker tasks and handles shutdown signals.",
+      "file": "code_example.py"
+    },
+    {
+      "id": "error_01",
+      "tool": "debug_error",
+      "title": "Nested Payload KeyError & Traceback",
+      "request": "Debug this KeyError raised during JWT authentication token extraction.",
+      "file": "error_example.log"
+    },
+    {
+      "id": "test_01",
+      "tool": "analyze_test",
+      "title": "Pytest Assertion Discrepancy",
+      "request": "Analyze this test failure where expected tax rate did not match actual calculation.",
+      "file": "test_failure.txt"
+    },
+    {
+      "id": "docs_01",
+      "tool": "search_docs",
+      "title": "Strands Decider System One Setup",
+      "request": "Search documentation for how to start strands-decider serve on port 8099 with Qwen torso.",
+      "file": null
+    }
+  ]
+}

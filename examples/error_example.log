@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "C:\workspace\services\auth_service.py", line 142, in authenticate_request
+    claims = self.decode_jwt_token(raw_header)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\workspace\services\auth_service.py", line 88, in decode_jwt_token
+    auth_payload = unverified_claims["auth"]
+                   ~~~~~~~~~~~~~~~~~^^^^^^^^
+KeyError: 'auth'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\workspace\server.py", line 59, in handle_dispatch
+    user_context = auth_service.authenticate_request(auth_header)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\workspace\services\auth_service.py", line 148, in authenticate_request
+    raise AuthenticationFailed("Malformed JWT token claims: missing 'auth' object")
+exceptions.AuthenticationFailed: Malformed JWT token claims: missing 'auth' object

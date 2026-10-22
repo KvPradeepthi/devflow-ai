@@ -1,0 +1,142 @@
+[
+  {
+    "id": "eval_01",
+    "category": "explain_code",
+    "request": "Can you explain how this async generator works with the yield statement?",
+    "context": "async def stream_items(n: int):\n    for i in range(n):\n        await asyncio.sleep(0.1)\n        yield i * 2",
+    "expected_tool": "explain_code"
+  },
+  {
+    "id": "eval_02",
+    "category": "explain_code",
+    "request": "What is the time complexity and memory behavior of this recursive merge sort implementation?",
+    "context": "def merge_sort(arr):\n    if len(arr) <= 1: return arr\n    mid = len(arr) // 2\n    return merge(merge_sort(arr[:mid]), merge_sort(arr[mid:]))",
+    "expected_tool": "explain_code"
+  },
+  {
+    "id": "eval_03",
+    "category": "explain_code",
+    "request": "Walk me through how this Python metaclass enforces singleton instance creation.",
+    "context": "class SingletonMeta(type):\n    _instances = {}\n    def __call__(cls, *args, **kwargs):\n        if cls not in cls._instances:\n            cls._instances[cls] = super().__call__(*args, **kwargs)\n        return cls._instances[cls]",
+    "expected_tool": "explain_code"
+  },
+  {
+    "id": "eval_04",
+    "category": "explain_code",
+    "request": "Explain this context manager implementation using __enter__ and __exit__.",
+    "context": "class DatabaseConnection:\n    def __enter__(self): self.conn = connect(); return self.conn\n    def __exit__(self, exc_type, exc_val, exc_tb): self.conn.close()",
+    "expected_tool": "explain_code"
+  },
+  {
+    "id": "eval_05",
+    "category": "explain_code",
+    "request": "How does this Rust match expression handle exhaustive pattern matching?",
+    "context": "fn process(val: Option<i32>) -> i32 { match val { Some(x) => x * 2, None => 0 } }",
+    "expected_tool": "explain_code"
+  },
+  {
+    "id": "eval_06",
+    "category": "debug_error",
+    "request": "Why am I getting this KeyError when parsing the response dictionary?",
+    "context": "Traceback (most recent call last):\n  File \"app.py\", line 42, in process_user\n    token = payload[\"auth\"][\"token\"]\nKeyError: 'auth'",
+    "expected_tool": "debug_error"
+  },
+  {
+    "id": "eval_07",
+    "category": "debug_error",
+    "request": "What is causing this TypeError in my data pipeline?",
+    "context": "Traceback (most recent call last):\n  File \"pipeline.py\", line 108, in transform\n    result = total + item['price']\nTypeError: unsupported operand type(s) for +: 'int' and 'NoneType'",
+    "expected_tool": "debug_error"
+  },
+  {
+    "id": "eval_08",
+    "category": "debug_error",
+    "request": "Debug this IndexError occurring during batch array slicing.",
+    "context": "Traceback (most recent call last):\n  File \"batch.py\", line 55, in get_batch\n    item = buffer[index]\nIndexError: list index out of range",
+    "expected_tool": "debug_error"
+  },
+  {
+    "id": "eval_09",
+    "category": "debug_error",
+    "request": "Investigate this connection refused error thrown by the Redis cache client.",
+    "context": "redis.exceptions.ConnectionError: Error 111 connecting to localhost:6379. Connection refused.",
+    "expected_tool": "debug_error"
+  },
+  {
+    "id": "eval_10",
+    "category": "debug_error",
+    "request": "Crash analysis for this unhandled AttributeError on NoneType object.",
+    "context": "AttributeError: 'NoneType' object has no attribute 'get_headers' at line 203 in api_client.py",
+    "expected_tool": "debug_error"
+  },
+  {
+    "id": "eval_11",
+    "category": "analyze_test",
+    "request": "Our unit test failed on the discount calculation assertion, what caused this discrepancy?",
+    "context": "FAILED tests/test_billing.py::test_discount - AssertionError: assert 90.0 == 95.0\n+  where 90.0 = apply_discount(100.0, 0.10)\n-  where 95.0 = expected_value",
+    "expected_tool": "analyze_test"
+  },
+  {
+    "id": "eval_12",
+    "category": "analyze_test",
+    "request": "Why did pytest report 2 test failures in the authentication test suite?",
+    "context": "=== FAILURES ===\n____ test_login_invalid_password ____\nassert response.status_code == 401\nE assert 500 == 401\n=== 1 failed in 0.22s ===",
+    "expected_tool": "analyze_test"
+  },
+  {
+    "id": "eval_13",
+    "category": "analyze_test",
+    "request": "Interpret this unittest assertion failure during date comparison.",
+    "context": "FAIL: test_date_parsing (test_parser.TestParser)\nAssertionError: datetime.date(2026, 10, 23) != datetime.date(2026, 10, 22)",
+    "expected_tool": "analyze_test"
+  },
+  {
+    "id": "eval_14",
+    "category": "analyze_test",
+    "request": "Diagnose this Jest snapshot test failure in our frontend component.",
+    "context": "FAIL src/Button.test.tsx\n● Button component › snapshot matches\n- Snapshot\n+ Received\n- <button class=\"primary\">Submit</button>\n+ <button class=\"btn-primary\">Submit</button>",
+    "expected_tool": "analyze_test"
+  },
+  {
+    "id": "eval_15",
+    "category": "analyze_test",
+    "request": "Analyze this failing test asserting schema validation behavior.",
+    "context": "FAILED tests/test_schema.py::test_validate_user - ValidationError: 1 validation error for UserModel\nemail\n  field required (type=value_error.missing)",
+    "expected_tool": "analyze_test"
+  },
+  {
+    "id": "eval_16",
+    "category": "search_docs",
+    "request": "How do I configure and serve Strands Decider 2B using the CLI on port 8099?",
+    "context": "Need parameters for strands-decider serve and supported question types.",
+    "expected_tool": "search_docs"
+  },
+  {
+    "id": "eval_17",
+    "category": "search_docs",
+    "request": "What is the recommended Converse API parameter schema for Amazon Bedrock in boto3?",
+    "context": "Looking for documentation on system prompt formatting and inferenceConfig.",
+    "expected_tool": "search_docs"
+  },
+  {
+    "id": "eval_18",
+    "category": "search_docs",
+    "request": "Search documentation for Python pytest fixture isolation and teardown patterns.",
+    "context": "Need documentation reference for scope='module' fixtures.",
+    "expected_tool": "search_docs"
+  },
+  {
+    "id": "eval_19",
+    "category": "search_docs",
+    "request": "Where are the specifications for two-tier agent error handling and confidence gates?",
+    "context": "Looking for docs on circuit breakers and fallback policies.",
+    "expected_tool": "search_docs"
+  },
+  {
+    "id": "eval_20",
+    "category": "search_docs",
+    "request": "Search local docs for Strands Decider pointer readout head architecture and LoRA adapter details.",
+    "context": "Need reference guide on Qwen3.5-2B torso.",
+    "expected_tool": "search_docs"
+  }
+]

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StrandsDeciderToolSelectionSchema",
+  "description": "Typed ChoiceQuestion wire format for Strands Decider 2B System One inference.",
+  "model": "StrandsAgents/strands-decider-2B-qwen3.5-v1-2610",
+  "pattern_tag": "#tool-selection",
+  "questions": {
+    "tool_choice": {
+      "type": "choice",
+      "instructions": "Select the most appropriate developer tool to process the user's request.",
+      "criteria": {
+        "explain_code": "Explain code structure, syntax, logic, algorithms, or programming concepts.",
+        "debug_error": "Analyze exceptions, stack traces, crash logs, and runtime error messages.",
+        "analyze_test": "Interpret failing test output, assertions, test runner logs, and expected vs actual values.",
+        "search_docs": "Retrieve relevant documentation, API specifications, and architectural guides from the local documentation collection."
+      }
+    }
+  },
+  "confidence_formula": "(N * p_max - 1) / (N - 1)",
+  "confidence_threshold": 0.60,
+  "options": [
+    "explain_code",
+    "debug_error",
+    "analyze_test",
+    "search_docs"
+  ]
+}

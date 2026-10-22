@@ -1,0 +1,277 @@
+import json
+import os
+
+notebook = {
+    "cells": [
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "# Strands Decider 2B — Authenticated Remote Inference Server\n",
+                "\n",
+                "**DevFlow AI — AWS Agent Experience Hackathon**\n",
+                "\n",
+                "This notebook runs the official **Strands Decider 2B** (`StrandsAgents/strands-decider-2B-qwen3.5-v1-2610`) model server with:\n",
+                "1. **Automatic Device Detection**: Runs on GPU (CUDA) if available; gracefully falls back to CPU mode (`--device cpu`) if Colab assigns a CPU instance.\n",
+                "2. **Bearer Token Authentication**: Protects the server behind a FastAPI reverse proxy so the public tunnel cannot be abused by unauthorized parties.\n",
+                "3. **Zero-Setup Secure Tunnel**: Exposes the authenticated proxy via Cloudflare Tunnel (`pycloudflared`) without requiring an account or port forwarding."
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "### Step 1: Hardware & Device Verification\n",
+                "Checks if an NVIDIA GPU (e.g. Tesla T4) is attached. If no GPU is available, detects CPU and configures the server accordingly."
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "import torch\n",
+                "import psutil\n",
+                "import os\n",
+                "\n",
+                "ram_gb = psutil.virtual_memory().total / (1024 ** 3)\n",
+                "print(f\"Total System RAM: {ram_gb:.2f} GB\")\n",
+                "\n",
+                "if torch.cuda.is_available():\n",
+                "    gpu_name = torch.cuda.get_device_name(0)\n",
+                "    gpu_mem = torch.cuda.get_device_properties(0).total_memory / (1024 ** 3)\n",
+                "    DEVICE = \"cuda\"\n",
+                "    print(f\"[+] GPU Available: {gpu_name} ({gpu_mem:.2f} GB VRAM)\")\n",
+                "    print(\"    Mode: High-Performance GPU Inference (~20-115ms latency)\")\n",
+                "else:\n",
+                "    DEVICE = \"cpu\"\n",
+                "    print(\"[-] GPU Not Available (Colab CPU Runtime)\")\n",
+                "    print(f\"    Mode: CPU-Only Inference ({ram_gb:.2f} GB RAM is sufficient for 2B weights)\")\n",
+                "    print(\"    Latency will be higher (~400-1200ms), but fully functional.\")"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "### Step 2: Install Official Packages & Dependencies\n",
+                "Installs `strands-decider`, `fastapi`, `uvicorn`, `httpx`, and `pycloudflared`."
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "!pip install -q strands-decider fastapi uvicorn httpx pycloudflared\n",
+                "print(\"[+] Packages installed successfully!\")"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "### Step 3: Configure Authentication Token\n",
+                "A secure random Bearer token is generated to protect your remote model endpoint."
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "import secrets\n",
+                "\n",
+                "# Generate or set your secret API key\n",
+                "API_KEY = secrets.token_hex(16)\n",
+                "print(f\"=======================================================\")\n",
+                "print(f\"YOUR STRANDS DECIDER API KEY:\")\n",
+                "print(f\"{API_KEY}\")\n",
+                "print(f\"=======================================================\")\n",
+                "print(\"Keep this key handy. You will paste it into your DevFlow AI environment.\")"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "### Step 4: Write Secure Reverse Proxy Script\n",
+                "This FastAPI proxy sits on port 8000 and requires `Authorization: Bearer <API_KEY>` for all incoming requests. Unauthorized requests receive `401 Unauthorized`. Valid requests are forwarded locally to `strands-decider` on port 8099."
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "proxy_code = f'''\n",
+                "from fastapi import FastAPI, Header, HTTPException, Request, Response\n",
+                "import httpx\n",
+                "import uvicorn\n",
+                "\n",
+                "app = FastAPI(title=\"Strands Decider Auth Proxy\")\n",
+                "SECRET_KEY = \"{API_KEY}\"\n",
+                "DECIDER_INTERNAL_URL = \"http://127.0.0.1:8099\"\n",
+                "\n",
+                "def verify_token(authorization: str | None = Header(None)):\n",
+                "    if not authorization:\n",
+                "        raise HTTPException(status_code=401, detail=\"Missing Authorization header\")\n",
+                "    parts = authorization.split()\n",
+                "    if len(parts) != 2 or parts[0].lower() != \"bearer\" or parts[1] != SECRET_KEY:\n",
+                "        raise HTTPException(status_code=401, detail=\"Invalid Bearer token\")\n",
+                "\n",
+                "@app.get(\"/health\")\n",
+                "async def proxy_health(authorization: str | None = Header(None)):\n",
+                "    verify_token(authorization)\n",
+                "    async with httpx.AsyncClient() as client:\n",
+                "        try:\n",
+                "            res = await client.get(f\"{{DECIDER_INTERNAL_URL}}/health\", timeout=5.0)\n",
+                "            return res.json()\n",
+                "        except Exception as e:\n",
+                "            return {{\"online\": False, \"error\": str(e)}}\n",
+                "\n",
+                "@app.post(\"/v1/systemone\")\n",
+                "async def proxy_systemone(request: Request, authorization: str | None = Header(None)):\n",
+                "    verify_token(authorization)\n",
+                "    body = await request.body()\n",
+                "    async with httpx.AsyncClient() as client:\n",
+                "        try:\n",
+                "            res = await client.post(\n",
+                "                f\"{{DECIDER_INTERNAL_URL}}/v1/systemone\",\n",
+                "                content=body,\n",
+                "                headers={{\"Content-Type\": \"application/json\"}},\n",
+                "                timeout=30.0,\n",
+                "            )\n",
+                "            return Response(content=res.content, status_code=res.status_code, media_type=\"application/json\")\n",
+                "        except Exception as e:\n",
+                "            raise HTTPException(status_code=502, detail=f\"Internal Decider error: {{e}}\")\n",
+                "\n",
+                "if __name__ == \"__main__\":\n",
+                "    uvicorn.run(app, host=\"127.0.0.1\", port=8000)\n",
+                "'''\n",
+                "\n",
+                "with open(\"auth_proxy.py\", \"w\") as f:\n",
+                "    f.write(proxy_code)\n",
+                "print(\"[+] Created auth_proxy.py successfully.\")"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "### Step 5: Launch Strands Decider & Secure Tunnel\n",
+                "Starts `strands-decider serve` on port 8099, the auth proxy on port 8000, and opens an encrypted Cloudflare Tunnel to port 8000."
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "import subprocess\n",
+                "import time\n",
+                "from pycloudflared import try_cloudflare\n",
+                "\n",
+                "# 1. Start strands-decider server\n",
+                "model_checkpoint = \"StrandsAgents/strands-decider-2B-qwen3.5-v1-2610\"\n",
+                "device_flag = f\"--device {DEVICE}\"\n",
+                "print(f\"[*] Starting strands-decider on internal port 8099 (device: {DEVICE})...\")\n",
+                "decider_proc = subprocess.Popen([\n",
+                "    \"strands-decider\", \"serve\", model_checkpoint,\n",
+                "    \"--host\", \"127.0.0.1\", \"--port\", \"8099\",\n",
+                "    \"--device\", DEVICE\n",
+                "])\n",
+                "\n",
+                "# Wait 15 seconds for initial weight loading\n",
+                "print(\"[*] Loading model weights into memory...\")\n",
+                "time.sleep(15)\n",
+                "\n",
+                "# 2. Start FastAPI auth proxy on port 8000\n",
+                "print(\"[*] Starting Authenticated Reverse Proxy on port 8000...\")\n",
+                "proxy_proc = subprocess.Popen([\"python\", \"auth_proxy.py\"])\n",
+                "time.sleep(3)\n",
+                "\n",
+                "# 3. Expose port 8000 via Cloudflare Tunnel\n",
+                "print(\"[*] Creating encrypted Cloudflare Tunnel to port 8000...\")\n",
+                "tunnel_url = try_cloudflare(port=8000).tunnel_url\n",
+                "\n",
+                "print(\"\\n\" + \"=\" * 75)\n",
+                "print(\"STRANDS DECIDER 2B SERVER IS LIVE AND SECURED!\")\n",
+                "print(\"=\" * 75)\n",
+                "print(f\"Public Tunnel URL : {tunnel_url}\")\n",
+                "print(f\"Bearer API Key    : {API_KEY}\")\n",
+                "print(\"=\" * 75)\n",
+                "print(\"\\nRun these exact commands in your Windows PowerShell terminal:\")\n",
+                "print(f'$env:STRANDS_DECIDER_URL = \"{tunnel_url}\"')\n",
+                "print(f'$env:STRANDS_DECIDER_API_KEY = \"{API_KEY}\"')\n",
+                "print('E:\\\\devflow_venv\\\\Scripts\\\\python.exe verify_live_e2e.py')\n",
+                "print(\"=\" * 75)"
+            ]
+        },
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                "### Step 6: Test Authenticated Inference (In-Notebook Verification)\n",
+                "Tests a real tool-selection decision using the authenticated tunnel."
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "import requests\n",
+                "\n",
+                "headers = {\n",
+                "    \"Authorization\": f\"Bearer {API_KEY}\",\n",
+                "    \"Content-Type\": \"application/json\",\n",
+                "}\n",
+                "\n",
+                "# 1. Test /health\n",
+                "health_res = requests.get(f\"{tunnel_url}/health\", headers=headers, timeout=10)\n",
+                "print(\"Health Check Response:\", health_res.json())\n",
+                "\n",
+                "# 2. Test /v1/systemone with a real tool-selection query\n",
+                "payload = {\n",
+                "    \"decision_type\": \"tool_selection\",\n",
+                "    \"prompt\": \"Why is my pytest asserting assert 1 == 2?\",\n",
+                "    \"choices\": [\"explain_code\", \"debug_error\", \"analyze_test\", \"search_docs\"],\n",
+                "    \"context\": \"FAILED test_app.py::test_calc - AssertionError: 1 != 2\"\n",
+                "}\n",
+                "\n",
+                "decision_res = requests.post(f\"{tunnel_url}/v1/systemone\", json=payload, headers=headers, timeout=20)\n",
+                "print(\"\\nDecision Response from Live Model:\")\n",
+                "print(decision_res.json())"
+            ]
+        }
+    ],
+    "metadata": {
+        "accelerator": "GPU",
+        "colab": {
+            "provenance": []
+        },
+        "kernelspec": {
+            "display_name": "Python 3",
+            "name": "python3"
+        },
+        "language_info": {
+            "name": "python"
+        }
+    },
+    "nbformat": 4,
+    "nbformat_minor": 2
+}
+
+os.makedirs("notebooks", exist_ok=True)
+notebook_path = os.path.join("notebooks", "decider_colab_server.ipynb")
+with open(notebook_path, "w", encoding="utf-8") as f:
+    json.dump(notebook, f, indent=2)
+
+print(f"Generated {notebook_path} successfully.")
